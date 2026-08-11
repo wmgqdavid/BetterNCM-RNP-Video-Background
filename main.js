@@ -535,51 +535,24 @@ async function rnpvbBootstrap(selfPlugin) {
   rnpvbScheduleSync();
 }
 
-if (g…2093 tokens truncated…ill="none" stroke="url(#ring)">
-      <circle r="112" stroke-width="3" opacity=".5"/>
-      <circle r="91" stroke-width="4" opacity=".65"/>
-      <circle r="69" stroke-width="5" opacity=".78"/>
-      <circle r="48" stroke-width="6" opacity=".92"/>
-      <circle r="26" stroke-width="7"/>
-    </g>
-    <circle cx="239" cy="58" r="5" fill="#53e5ff"/>
-  </g>
-  <text x="65" y="472" fill="#fff" font-family="Segoe UI, Arial, sans-serif" font-size="31" font-weight="700" letter-spacing="2">MIDNIGHT SIGNAL</text>
-  <text x="66" y="507" fill="#bcb0ff" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" letter-spacing="5">LOCAL VIDEO</text>
+if (globalThis.__RNPVB_TESTING__) {
+  globalThis.__RNPVB_TEST_API__ = {
+    baseName: rnpvbBaseName,
+    directoryName: rnpvbDirectoryName,
+    isSupportedVideoPath: rnpvbIsSupportedVideoPath,
+    normalizeSettings: rnpvbNormalizeSettings
+  };
+}
 
-  <g font-family="Segoe UI, Arial, sans-serif" text-anchor="middle">
-    <text x="654" y="178" fill="#aaa9c9" opacity=".34" font-size="20" transform="rotate(7 654 178)">Through the silence, I still hear you call</text>
-    <text x="647" y="226" fill="#c6c2e7" opacity=".58" font-size="24" transform="rotate(5 647 226)">Neon skies are falling down</text>
-    <text x="650" y="287" fill="#fff" font-size="30" font-weight="700" transform="rotate(-3 650 287)">Echoes travel far in the midnight signal</text>
-    <text x="650" y="337" fill="#c6c2e7" opacity=".62" font-size="23" transform="rotate(-4 650 337)">Lost between the waves of time</text>
-    <text x="647" y="380" fill="#aaa9c9" opacity=".34" font-size="19" transform="rotate(-6 647 380)">Someday soon, we’ll find the light</text>
-  </g>
+plugin.onLoad((selfPlugin) => {
+  rnpvbBootstrap(selfPlugin).catch((error) => {
+    rnpvbSetStatus(`插件初始化失败：${error.message || error}`, "error");
+  });
+});
 
-  <g transform="translate(615 414)" filter="url(#shadow)" font-family="Segoe UI, Arial, sans-serif">
-    <rect width="292" height="166" rx="16" fill="#08132b" fill-opacity=".84" stroke="#655bc3"/>
-    <g fill="#e8e9ff" font-size="15">
-      <text x="60" y="38">MP4 / WebM</text>
-      <text x="60" y="78">LOOP</text>
-      <text x="60" y="118">MUTE</text>
-      <text x="60" y="152">BRIGHTNESS</text>
-    </g>
-    <g stroke="#41d8ff" stroke-width="2" fill="none">
-      <rect x="18" y="21" width="18" height="20" rx="2"/>
-      <path d="M24 21v20M30 21v20M18 27h18M18 35h18"/>
-      <path d="M18 71a12 12 0 0 1 20-7l3 3M41 59v8h-8M40 73a12 12 0 0 1-20 7l-3-3M17 85v-8h8"/>
-      <path d="M20 112h6l8-7v22l-8-7h-6zM39 108l9 14M48 108l-9 14"/>
-      <circle cx="27" cy="147" r="7"/>
-      <path d="M27 134v-5M27 165v-5M14 147H9M45 147h-5M18 138l-4-4M40 160l-4-4M36 138l4-4M14 160l4-4"/>
-    </g>
-    <g>
-      <rect x="224" y="61" width="45" height="22" rx="11" fill="#30cfff"/>
-      <circle cx="258" cy="72" r="8" fill="#fff"/>
-      <rect x="224" y="101" width="45" height="22" rx="11" fill="#42465e"/>
-      <circle cx="235" cy="112" r="8" fill="#d8d8df"/>
-      <rect x="176" y="145" width="93" height="4" rx="2" fill="#38415d"/>
-      <rect x="176" y="145" width="62" height="4" rx="2" fill="#45d9ff"/>
-      <circle cx="238" cy="147" r="7" fill="#b8adff"/>
-    </g>
-  </g>
-  <rect x="5" y="5" width="950" height="630" rx="19" fill="none" stroke="#7772bb" stroke-opacity=".45"/>
-</svg>
+plugin.onAllPluginsLoaded(() => {
+  rnpvbScheduleSync();
+  rnpvbRefreshConfigViews();
+});
+
+plugin.onConfig(() => rnpvbCreateConfigView());
