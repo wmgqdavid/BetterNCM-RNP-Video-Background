@@ -4,19 +4,19 @@
 
 - [x] 公开作者已统一为 GitHub 用户名 `wmgqdavid`。
 - [x] 商店登记文件已填写 `wmgqdavid/BetterNCM-RNP-Video-Background`。
-- [ ] 在 GitHub 创建公开仓库 `BetterNCM-RNP-Video-Background`。
-- [ ] 推送 `main` 分支。
+- [x] 已创建公开仓库 `wmgqdavid/BetterNCM-RNP-Video-Background`。
+- [x] 已推送 `main` 分支。
 - [ ] 创建版本标签与 Release：`v0.1.0`。
 - [ ] 把 `outputs/rnp-video-background-0.1.0.plugin` 和 `SHA256SUMS.txt` 添加为 Release 附件。
 
 ## 二、提交 BetterNCM 插件市场
 
-- [ ] 阅读并确认当前上架准则。
-- [ ] Fork `BetterNCM/BetterNCM-Plugins`。
-- [ ] 把填写完成的登记文件复制为 `plugins-list/rnp-video-background.json`。
-- [ ] 新建分支并提交该单个 JSON 文件。
-- [ ] 向 `BetterNCM/BetterNCM-Plugins:master` 创建 Pull Request。
-- [ ] 在 PR 描述中说明依赖 RefinedNowPlaying Next、仅本地读取视频、不触碰歌词 Overview/复制模式。
+- [x] 已阅读并确认当前上架准则。
+- [x] 已 Fork `BetterNCM/BetterNCM-Plugins`。
+- [x] 已提交 `plugins-list/rnp-video-background.json`。
+- [x] 已创建 `add-rnp-video-background` 分支，且只改动一个登记文件。
+- [x] 已创建 [BetterNCM-Plugins PR #725](https://github.com/BetterNCM/BetterNCM-Plugins/pull/725)。
+- [x] PR 已说明依赖、隐私边界和歌词模式边界。
 - [ ] 等待自动抓取与审核；如有反馈，修正源仓库并递增语义化版本号。
 
 ## 三、每次更新
