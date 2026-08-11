@@ -2,6 +2,8 @@
 
 为 BetterNCM 的 RefinedNowPlaying Next 播放页添加可记忆的本地 MP4/WebM 视频背景。
 
+发布状态：源码已公开，BetterNCM 官方插件库上架申请为 [PR #725](https://github.com/BetterNCM/BetterNCM-Plugins/pull/725)，等待维护者审核。
+
 插件只改动背景和播放页控制区，不会点击或切换歌词按钮，也不会修改 `.rnp-lyrics-line`、Overview/复制模式或 `body.lyric-rotate`。因此正常旋转歌词会继续由 RefinedNowPlaying Next 自己控制。
 
 ## 功能
@@ -29,7 +31,7 @@
 
 ### 本地安装
 
-1. 下载 Releases 中的 `rnp-video-background-0.1.0.plugin`。
+1. 从项目 Release 或本地交付目录取得 `rnp-video-background-0.1.0.plugin`。
 2. 把该文件放入 BetterNCM 数据目录下的 `plugins` 文件夹。
 3. 重启网易云音乐，或在 BetterNCM 中重新加载插件。
 4. 确认 RefinedNowPlaying Next 已安装并启用。
