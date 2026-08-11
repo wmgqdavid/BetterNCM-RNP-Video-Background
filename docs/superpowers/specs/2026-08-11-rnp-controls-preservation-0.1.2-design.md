@@ -1,7 +1,7 @@
 # RNP Video Background 0.1.2 功能保留设计
 
 日期：2026-08-11  
-状态：待用户复核  
+状态：已确认并实施  
 适配基线：BetterNCM + RefinedNowPlaying Next 3.0.2
 
 ## 1. 问题与根因
