@@ -13,7 +13,8 @@
 - 记住视频路径、填充方式和背景亮度
 - 进入 RefinedNowPlaying Next 播放页时隐藏其自带背景
 - 保留封面、歌名、歌手与正常旋转歌词
-- 隐藏底部播放控制栏、进度条、音量及 RefinedNowPlaying Next 的多余按钮
+- 默认保留 RefinedNowPlaying Next 的设置、全屏、歌词与全部交互功能
+- 可选开启“精简播放控件”，仅隐藏底部播放栏、进度条、音量和 v3 控件
 - 离开播放页、停用插件或清除视频后恢复原界面
 - 视频成功解码首帧后才切换背景；失败时自动恢复原背景，避免整页黑屏
 - 视频只在本机读取，不上传文件、路径或使用数据
@@ -32,7 +33,7 @@
 
 ### 本地安装
 
-1. 从项目 Release 或本地交付目录取得 `rnp-video-background-0.1.1.plugin`。
+1. 从项目 Release 或本地交付目录取得 `rnp-video-background-0.1.2.plugin`。
 2. 把该文件放入 BetterNCM 数据目录下的 `plugins` 文件夹。
 3. 重启网易云音乐，或在 BetterNCM 中重新加载插件。
 4. 确认 RefinedNowPlaying Next 已安装并启用。
@@ -44,10 +45,12 @@
 
 1. BetterNCM → 插件 → `RNP Video Background` → 设置。
 2. 点击“选择 MP4/WebM”，选择本地视频。
-3. 按需调整“裁切铺满 / 完整显示”和背景亮度。
+3. 按需调整“裁切铺满 / 完整显示”、背景亮度和“精简播放控件”。
 4. 进入 RefinedNowPlaying Next 播放页。
 
 设置页还提供“重新加载”“清除视频”和“恢复显示默认值”。清除视频后，RefinedNowPlaying Next 原背景与控制区会立即恢复。
+
+“精简播放控件”默认关闭。开启后只隐藏底部播放栏、进度条、音量和 v3 控件；RNP 设置菜单、全屏、歌词切换和其他功能始终保留。
 
 ## 视频兼容性
 
