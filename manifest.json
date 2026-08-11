@@ -3,7 +3,7 @@
   "manifest_version": 1,
   "name": "RNP Video Background",
   "slug": "rnp-video-background",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "betterncm_version": ">=1.0.0",
   "author": "wmgqdavid",
   "author_link": "https://github.com/wmgqdavid",
