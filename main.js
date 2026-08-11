@@ -1,6 +1,7 @@
 const RNPVB_ID = "rnp-video-background";
 const RNPVB_VIDEO_ID = "rnpvb-video";
 const RNPVB_STYLE_ID = "rnpvb-style";
+const RNPVB_LOAD_TIMEOUT_MS = 15000;
 const RNPVB_FILTER = "视频文件 (*.mp4;*.webm)\0*.mp4;*.webm\0所有文件 (*.*)\0*.*\0";
 const RNPVB_DEFAULTS = Object.freeze({
   enabled: true,
@@ -54,6 +55,8 @@ const rnpvbState = {
   sourcePath: "",
   sourceUrl: "",
   mountToken: 0,
+  loadTimer: null,
+  failedSourcePath: "",
   retryPlayHandler: null,
   configRoots: new Set(),
   status: {
@@ -96,6 +99,28 @@ function rnpvbApplyVisualSettings() {
   body.style.setProperty("--rnpvb-brightness", String(rnpvbState.settings.brightness));
 }
 
+function rnpvbClearLoadTimer() {
+  if (!rnpvbState.loadTimer) return;
+  clearTimeout(rnpvbState.loadTimer);
+  rnpvbState.loadTimer = null;
+}
+
+function rnpvbSetPagePhase(phase) {
+  const body = document.body;
+  if (!body) return;
+  body.classList.remove(
+    "rnpvb-active",
+    "rnpvb-has-source",
+    "rnpvb-loading",
+    "rnpvb-ready"
+  );
+  if (phase === "loading") {
+    body.classList.add("rnpvb-active", "rnpvb-has-source", "rnpvb-loading");
+  } else if (phase === "ready") {
+    body.classList.add("rnpvb-active", "rnpvb-has-source", "rnpvb-ready");
+  }
+}
+
 async function rnpvbInjectStyles() {
   const previous = document.getElementById(RNPVB_STYLE_ID);
   if (previous) previous.remove();
@@ -110,7 +135,7 @@ async function rnpvbInjectStyles() {
     }
     style.textContent = String(cssText);
   } catch (error) {
-    style.textContent = `#${RNPVB_VIDEO_ID}{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;pointer-events:none;z-index:0}`;
+    style.textContent = `#${RNPVB_VIDEO_ID}{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;z-index:2;opacity:0}`;
     rnpvbSetStatus(`样式文件加载失败：${error.message || error}`, "error");
   }
   document.head.appendChild(style);
@@ -119,8 +144,11 @@ async function rnpvbInjectStyles() {
 
 function rnpvbClearMountedSource() {
   rnpvbState.mountToken += 1;
+  rnpvbClearLoadTimer();
+  rnpvbState.failedSourcePath = "";
   rnpvbState.sourcePath = "";
   rnpvbState.sourceUrl = "";
+  rnpvbSetPagePhase("idle");
   const video = rnpvbState.videoElement;
   if (video) {
     video.pause();
@@ -160,20 +188,81 @@ async function rnpvbEnsureMountedSource() {
   return mountedUrl;
 }
 
+function rnpvbMediaErrorMessage(mediaError) {
+  const code = Number(mediaError && mediaError.code);
+  if (code === 1) return "视频加载已取消，请点击“重新加载”再试。";
+  if (code === 2) return "视频文件读取失败，请确认文件仍然存在且可访问。";
+  if (code === 3) {
+    return "视频解码失败。建议使用 MP4（H.264/AVC + AAC，yuv420p）或 WebM（VP8/VP9）。";
+  }
+  if (code === 4) {
+    return "视频编码或封装格式不受支持。建议转换为 MP4（H.264/AVC + AAC，yuv420p）。";
+  }
+  return "视频无法播放，请确认文件有效；推荐使用 MP4（H.264/AVC + AAC）。";
+}
+
+function rnpvbIsCurrentVideo(video) {
+  return Boolean(
+    video &&
+    video === rnpvbState.videoElement &&
+    video.dataset.rnpvbMountToken === String(rnpvbState.mountToken)
+  );
+}
+
+function rnpvbFailVideo(video, message) {
+  if (!rnpvbIsCurrentVideo(video)) return;
+  rnpvbClearLoadTimer();
+  rnpvbState.failedSourcePath = rnpvbState.settings.filePath;
+  rnpvbDeactivate(true);
+  rnpvbSetStatus(message || rnpvbMediaErrorMessage(video.error), "error");
+}
+
+function rnpvbMarkVideoReady(video) {
+  if (!rnpvbIsCurrentVideo(video)) return;
+  const body = document.body;
+  if (
+    !body ||
+    !body.classList.contains("mq-playing") ||
+    !video.parentElement ||
+    !video.parentElement.classList.contains("rnp-bg")
+  ) return;
+
+  rnpvbClearLoadTimer();
+  rnpvbSetPagePhase("ready");
+  rnpvbSetStatus(`正在播放 ${rnpvbState.settings.fileName || "本地视频"}`, "ok");
+}
+
+function rnpvbBeginVideoLoad(video) {
+  if (!rnpvbIsCurrentVideo(video)) return;
+  rnpvbSetPagePhase("loading");
+  rnpvbClearLoadTimer();
+  const expectedToken = rnpvbState.mountToken;
+  rnpvbState.loadTimer = setTimeout(() => {
+    rnpvbState.loadTimer = null;
+    if (
+      expectedToken === rnpvbState.mountToken &&
+      rnpvbIsCurrentVideo(video) &&
+      video.readyState < 2
+    ) {
+      rnpvbFailVideo(
+        video,
+        "视频加载超时，已恢复原背景。请重新加载，或转换为 H.264/AVC 格式。"
+      );
+    }
+  }, RNPVB_LOAD_TIMEOUT_MS);
+}
+
 function rnpvbBindVideoEvents(video) {
   if (video.dataset.rnpvbBound === "1") return;
   video.dataset.rnpvbBound = "1";
-  video.addEventListener("canplay", () => {
-    rnpvbSetStatus(`正在播放 ${rnpvbState.settings.fileName || "本地视频"}`, "ok");
-  });
+  video.addEventListener("loadeddata", () => rnpvbMarkVideoReady(video));
+  video.addEventListener("canplay", () => rnpvbMarkVideoReady(video));
   video.addEventListener("error", () => {
-    const mediaError = video.error;
-    const code = mediaError ? `（媒体错误 ${mediaError.code}）` : "";
-    rnpvbSetStatus(`视频无法播放${code}，请确认编码或重新选择文件。`, "error");
+    rnpvbFailVideo(video, rnpvbMediaErrorMessage(video.error));
   });
 }
 
-function rnpvbEnsureVideo(container, sourceUrl) {
+function rnpvbEnsureVideo(backgroundContainer, sourceUrl) {
   let video = document.getElementById(RNPVB_VIDEO_ID);
   if (!video) {
     video = document.createElement("video");
@@ -189,16 +278,23 @@ function rnpvbEnsureVideo(container, sourceUrl) {
     rnpvbBindVideoEvents(video);
   }
 
-  if (video.parentElement !== container) {
-    container.insertBefore(video, container.firstChild || null);
-  }
-
-  if (video.getAttribute("src") !== sourceUrl) {
-    video.src = sourceUrl;
-    video.load();
+  if (video.parentElement !== backgroundContainer) {
+    backgroundContainer.appendChild(video);
   }
 
   rnpvbState.videoElement = video;
+  video.dataset.rnpvbMountToken = String(rnpvbState.mountToken);
+
+  if (video.getAttribute("src") !== sourceUrl) {
+    rnpvbBeginVideoLoad(video);
+    video.src = sourceUrl;
+    video.load();
+  } else if (video.readyState >= 2) {
+    rnpvbMarkVideoReady(video);
+  } else if (!rnpvbState.loadTimer) {
+    rnpvbBeginVideoLoad(video);
+  }
+
   return video;
 }
 
@@ -207,14 +303,24 @@ async function rnpvbAttemptPlay(video) {
     const playResult = video.play();
     if (playResult && typeof playResult.then === "function") await playResult;
   } catch (error) {
+    if (error && error.name !== "NotAllowedError") {
+      if (error.name !== "AbortError") {
+        rnpvbFailVideo(video, rnpvbMediaErrorMessage(video.error));
+      }
+      return;
+    }
     rnpvbSetStatus("自动播放被拦截；在播放页点击一次即可继续。", "error");
     if (rnpvbState.retryPlayHandler) {
       document.removeEventListener("pointerdown", rnpvbState.retryPlayHandler, true);
     }
     rnpvbState.retryPlayHandler = () => {
       video.muted = true;
-      video.play().catch(() => {
-        rnpvbSetStatus("仍无法自动播放，请在插件设置中点击“重新加载”。", "error");
+      video.play().catch((retryError) => {
+        if (retryError && retryError.name === "NotAllowedError") {
+          rnpvbSetStatus("仍无法自动播放，请在插件设置中点击“重新加载”。", "error");
+        } else {
+          rnpvbFailVideo(video, rnpvbMediaErrorMessage(video.error));
+        }
       });
       rnpvbState.retryPlayHandler = null;
     };
@@ -226,9 +332,8 @@ async function rnpvbAttemptPlay(video) {
 }
 
 function rnpvbDeactivate(removeVideo) {
-  if (document.body) {
-    document.body.classList.remove("rnpvb-active", "rnpvb-has-source");
-  }
+  rnpvbClearLoadTimer();
+  rnpvbSetPagePhase("idle");
   const video = rnpvbState.videoElement || document.getElementById(RNPVB_VIDEO_ID);
   if (video) {
     video.pause();
@@ -240,10 +345,10 @@ function rnpvbDeactivate(removeVideo) {
 async function rnpvbSyncPage() {
   if (rnpvbState.destroyed) return;
   const body = document.body;
-  const container = document.querySelector(".g-single");
+  const pageContainer = document.querySelector(".g-single");
   const onRefinedNowPlaying = Boolean(
     body &&
-    container &&
+    pageContainer &&
     body.classList.contains("refined-now-playing") &&
     body.classList.contains("mq-playing")
   );
@@ -258,17 +363,32 @@ async function rnpvbSyncPage() {
     return;
   }
 
+  if (rnpvbState.failedSourcePath === rnpvbState.settings.filePath) {
+    return;
+  }
+
+  const backgroundContainer =
+    document.querySelector("#rnp-view .g-single > .rnp-bg") ||
+    document.querySelector(".g-single > .rnp-bg");
+  if (!backgroundContainer) {
+    rnpvbDeactivate(false);
+    rnpvbSetStatus("正在等待 RefinedNowPlaying Next 背景层…", "loading");
+    return;
+  }
+
   try {
     const sourceUrl = await rnpvbEnsureMountedSource();
     if (!sourceUrl || rnpvbState.destroyed) return;
-    const currentContainer = document.querySelector(".g-single");
-    if (!currentContainer || !document.body.classList.contains("mq-playing")) return;
+    const currentBackground =
+      document.querySelector("#rnp-view .g-single > .rnp-bg") ||
+      document.querySelector(".g-single > .rnp-bg");
+    if (!currentBackground || !document.body.classList.contains("mq-playing")) return;
 
-    const video = rnpvbEnsureVideo(currentContainer, sourceUrl);
+    const video = rnpvbEnsureVideo(currentBackground, sourceUrl);
     rnpvbApplyVisualSettings();
-    document.body.classList.add("rnpvb-active", "rnpvb-has-source");
     await rnpvbAttemptPlay(video);
   } catch (error) {
+    rnpvbState.failedSourcePath = rnpvbState.settings.filePath;
     rnpvbDeactivate(true);
     rnpvbSetStatus(error.message || String(error), "error");
   }
@@ -478,7 +598,7 @@ function rnpvbCreateConfigView() {
   });
   const note = rnpvbCreateElement("p", {
     className: "rnpvb-note",
-    textContent: "文件路径仅保存在本机 BetterNCM 配置中；插件不会上传视频、路径或使用数据。"
+    textContent: "推荐格式：MP4（H.264/AVC + AAC）或 WebM（VP8/VP9）。HEVC/H.265 可能无法播放。文件路径仅保存在本机，插件不会上传视频、路径或使用数据。"
   });
 
   root.append(title, lead, card, actions, status, note);
@@ -540,7 +660,8 @@ if (globalThis.__RNPVB_TESTING__) {
     baseName: rnpvbBaseName,
     directoryName: rnpvbDirectoryName,
     isSupportedVideoPath: rnpvbIsSupportedVideoPath,
-    normalizeSettings: rnpvbNormalizeSettings
+    normalizeSettings: rnpvbNormalizeSettings,
+    mediaErrorMessage: rnpvbMediaErrorMessage
   };
 }
 
