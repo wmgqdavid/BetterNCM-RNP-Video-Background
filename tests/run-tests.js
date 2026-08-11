@@ -37,7 +37,7 @@ function loadPureApi() {
 test("manifest contains the required BetterNCM metadata", () => {
   assert.equal(manifest.manifest_version, 1);
   assert.equal(manifest.slug, "rnp-video-background");
-  assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
+  assert.equal(manifest.version, "0.1.1");
   assert.deepEqual(manifest.requirements, ["RefinedNowPlayingNext"]);
   assert.deepEqual(manifest.loadAfter, ["RefinedNowPlayingNext"]);
   assert.equal(manifest.injects.Main[0].file, "main.js");
@@ -72,6 +72,28 @@ test("plugin code uses local BetterNCM file APIs and has no network call", () =>
   assert.match(mainSource, /betterncm\.app\.openFileDialog/);
   assert.match(mainSource, /betterncm\.fs\.mountFile/);
   assert.doesNotMatch(mainSource, /\bfetch\s*\(|XMLHttpRequest|WebSocket/);
+});
+
+test("video mounts inside the native RNP background layer", () => {
+  assert.match(mainSource, /#rnp-view \.g-single > \.rnp-bg/);
+  assert.match(mainSource, /backgroundContainer\.appendChild\(video\)/);
+  assert.doesNotMatch(mainSource, /currentContainer|insertBefore\(video/);
+  assert.match(styleSource, /#rnpvb-video\s*\{[\s\S]*?position:\s*absolute/);
+});
+
+test("native background is hidden only after the video is ready", () => {
+  assert.match(styleSource, /body\.rnpvb-ready\.mq-playing \.rnp-bg > :not\(#rnpvb-video\)/);
+  assert.match(styleSource, /body\.rnpvb-ready\.mq-playing \.rnp-bg\s*\{[\s\S]*?visibility:\s*visible/);
+  assert.doesNotMatch(styleSource, /body\.rnpvb-active\.mq-playing \.rnp-bg/);
+  assert.match(mainSource, /rnpvbSetPagePhase\("ready"\)/);
+  assert.match(mainSource, /rnpvbFailVideo\(video/);
+});
+
+test("media errors provide actionable codec guidance", () => {
+  const { api } = loadPureApi();
+  assert.match(api.mediaErrorMessage({ code: 2 }), /读取失败/);
+  assert.match(api.mediaErrorMessage({ code: 3 }), /H\.264\/AVC/);
+  assert.match(api.mediaErrorMessage({ code: 4 }), /不受支持/);
 });
 
 test("plugin cannot switch or style lyric overview/rotation state", () => {
