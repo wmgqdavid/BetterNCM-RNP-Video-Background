@@ -25,11 +25,11 @@ body.rnpvb-ready.mq-playing #rnpvb-video {
   opacity: 1;
 }
 
-body.rnpvb-ready.mq-playing {
+body.rnpvb-ready.rnpvb-compact-controls.mq-playing {
   --bottombar-height: 0px !important;
 }
 
-body.rnpvb-ready.mq-playing .g-single {
+body.rnpvb-ready.rnpvb-compact-controls.mq-playing .g-single {
   bottom: 0 !important;
 }
 
@@ -45,28 +45,18 @@ body.rnpvb-ready.mq-playing .rnp-bg > :not(#rnpvb-video) {
   pointer-events: none !important;
 }
 
-body.rnpvb-ready.mq-playing #main-player,
-body.rnpvb-ready.mq-playing .m-player-fm,
-body.rnpvb-ready.mq-playing .rnp-v3-controls-host,
-body.rnpvb-ready.mq-playing .rnp-v3-controls {
+body.rnpvb-ready.rnpvb-compact-controls.mq-playing #main-player,
+body.rnpvb-ready.rnpvb-compact-controls.mq-playing .m-player-fm,
+body.rnpvb-ready.rnpvb-compact-controls.mq-playing .rnp-v3-controls-host,
+body.rnpvb-ready.rnpvb-compact-controls.mq-playing .rnp-v3-controls {
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
-body.rnpvb-ready.mq-playing #rnp-settings,
-body.rnpvb-ready.mq-playing .rnp-settings-menu,
-body.rnpvb-ready.mq-playing .rnp-full-screen-button,
-body.rnpvb-ready.mq-playing .rnp-full-screen-clock,
-body.rnpvb-ready.mq-playing .rnp-progressbar-preview,
-body.rnpvb-ready.mq-playing .progressbar-preview,
-body.rnpvb-ready.mq-playing .rnp-mini-song-info {
+body.rnpvb-ready.rnpvb-compact-controls.mq-playing .rnp-progressbar-preview,
+body.rnpvb-ready.rnpvb-compact-controls.mq-playing .progressbar-preview {
   display: none !important;
-}
-
-body.rnpvb-ready.mq-playing .u-resize {
-  opacity: 0 !important;
-  pointer-events: none !important;
 }
 
 .rnpvb-config {
