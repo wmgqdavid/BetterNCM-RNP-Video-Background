@@ -9,7 +9,8 @@ const RNPVB_DEFAULTS = Object.freeze({
   fileName: "",
   lastDirectory: "",
   fit: "cover",
-  brightness: 0.65
+  brightness: 0.65,
+  compactControls: false
 });
 
 function rnpvbClamp(value, min, max) {
@@ -41,7 +42,8 @@ function rnpvbNormalizeSettings(raw) {
     fit: input.fit === "contain" ? "contain" : "cover",
     brightness: Number.isFinite(numericBrightness)
       ? rnpvbClamp(numericBrightness, 0.15, 1)
-      : RNPVB_DEFAULTS.brightness
+      : RNPVB_DEFAULTS.brightness,
+    compactControls: input.compactControls === true
   };
 }
 
@@ -97,6 +99,7 @@ function rnpvbApplyVisualSettings() {
   if (!body) return;
   body.style.setProperty("--rnpvb-fit", rnpvbState.settings.fit);
   body.style.setProperty("--rnpvb-brightness", String(rnpvbState.settings.brightness));
+  body.classList.toggle("rnpvb-compact-controls", rnpvbState.settings.compactControls);
 }
 
 function rnpvbClearLoadTimer() {
@@ -462,6 +465,7 @@ function rnpvbRefreshConfigViews() {
     const fit = root.querySelector('[data-rnpvb-field="fit"]');
     const brightness = root.querySelector('[data-rnpvb-field="brightness"]');
     const brightnessValue = root.querySelector('[data-rnpvb-field="brightness-value"]');
+    const compactControls = root.querySelector('[data-rnpvb-field="compact-controls"]');
     const fileName = root.querySelector('[data-rnpvb-field="file-name"]');
     const status = root.querySelector('[data-rnpvb-field="status"]');
     const dependency = root.querySelector('[data-rnpvb-field="dependency"]');
@@ -470,6 +474,7 @@ function rnpvbRefreshConfigViews() {
     if (fit) fit.value = rnpvbState.settings.fit;
     if (brightness) brightness.value = String(rnpvbState.settings.brightness);
     if (brightnessValue) brightnessValue.textContent = `${Math.round(rnpvbState.settings.brightness * 100)}%`;
+    if (compactControls) compactControls.checked = rnpvbState.settings.compactControls;
     if (fileName) fileName.textContent = rnpvbState.settings.fileName || "尚未选择";
     if (status) {
       status.textContent = rnpvbState.status.message;
@@ -491,7 +496,7 @@ function rnpvbCreateConfigView() {
   const title = rnpvbCreateElement("h2", { textContent: "RNP Video Background" });
   const lead = rnpvbCreateElement("p", {
     className: "rnpvb-lead",
-    textContent: "在 RefinedNowPlaying Next 中循环静音播放本地视频，并隐藏原背景与底部控制区。"
+    textContent: "在 RefinedNowPlaying Next 中循环静音播放本地视频；可选择是否精简底部播放控件。"
   });
 
   const enabledInput = rnpvbCreateElement("input", {
@@ -539,6 +544,12 @@ function rnpvbCreateConfigView() {
     brightnessValue
   ]);
 
+  const compactControlsInput = rnpvbCreateElement("input", {
+    type: "checkbox",
+    "data-rnpvb-field": "compact-controls",
+    onchange: (event) => rnpvbUpdateSettings({ compactControls: event.target.checked })
+  });
+
   const dependency = rnpvbCreateElement("span", {
     "data-rnpvb-field": "dependency"
   });
@@ -554,6 +565,7 @@ function rnpvbCreateConfigView() {
       rnpvbCreateElement("div", { textContent: "背景亮度" }),
       brightnessControl
     ]),
+    rnpvbConfigRow("精简播放控件", compactControlsInput),
     rnpvbConfigRow("依赖状态", dependency)
   ]);
 
@@ -581,7 +593,8 @@ function rnpvbCreateConfigView() {
       rnpvbUpdateSettings({
         enabled: RNPVB_DEFAULTS.enabled,
         fit: RNPVB_DEFAULTS.fit,
-        brightness: RNPVB_DEFAULTS.brightness
+        brightness: RNPVB_DEFAULTS.brightness,
+        compactControls: RNPVB_DEFAULTS.compactControls
       });
       rnpvbSetStatus("显示设置已恢复；当前视频保留。", "ok");
     }
@@ -598,7 +611,7 @@ function rnpvbCreateConfigView() {
   });
   const note = rnpvbCreateElement("p", {
     className: "rnpvb-note",
-    textContent: "推荐格式：MP4（H.264/AVC + AAC）或 WebM（VP8/VP9）。HEVC/H.265 可能无法播放。文件路径仅保存在本机，插件不会上传视频、路径或使用数据。"
+    textContent: "“精简播放控件”默认关闭；开启后仅隐藏底部播放栏、进度条、音量和 v3 控件，RNP 设置与歌词功能仍会保留。推荐格式：MP4（H.264/AVC + AAC）或 WebM（VP8/VP9）。HEVC/H.265 可能无法播放。文件路径仅保存在本机。"
   });
 
   root.append(title, lead, card, actions, status, note);
@@ -619,6 +632,7 @@ function rnpvbDestroy() {
   if (document.body) {
     document.body.style.removeProperty("--rnpvb-fit");
     document.body.style.removeProperty("--rnpvb-brightness");
+    document.body.classList.remove("rnpvb-compact-controls");
   }
 }
 
