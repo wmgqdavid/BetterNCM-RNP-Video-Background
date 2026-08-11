@@ -1,0 +1,7 @@
+*.plugin
+*.zip
+test-results/
+release/
+outputs/
+preview-source.png
+preview-optimized.png
