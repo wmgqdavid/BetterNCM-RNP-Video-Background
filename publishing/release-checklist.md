@@ -6,8 +6,8 @@
 - [x] 商店登记文件已填写 `wmgqdavid/BetterNCM-RNP-Video-Background`。
 - [x] 已创建公开仓库 `wmgqdavid/BetterNCM-RNP-Video-Background`。
 - [x] 已推送 `main` 分支。
-- [ ] 创建版本标签与 Release：`v0.1.1`。
-- [ ] 把 `outputs/rnp-video-background-0.1.1.plugin` 和 `SHA256SUMS.txt` 添加为 Release 附件。
+- [ ] 创建版本标签与 Release：`v0.1.2`。
+- [ ] 把 `outputs/rnp-video-background-0.1.2.plugin` 和 `SHA256SUMS.txt` 添加为 Release 附件。
 
 ## 二、提交 BetterNCM 插件市场
 
