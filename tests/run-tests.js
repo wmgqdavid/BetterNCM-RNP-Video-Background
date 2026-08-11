@@ -37,7 +37,7 @@ function loadPureApi() {
 test("manifest contains the required BetterNCM metadata", () => {
   assert.equal(manifest.manifest_version, 1);
   assert.equal(manifest.slug, "rnp-video-background");
-  assert.equal(manifest.version, "0.1.1");
+  assert.equal(manifest.version, "0.1.2");
   assert.deepEqual(manifest.requirements, ["RefinedNowPlayingNext"]);
   assert.deepEqual(manifest.loadAfter, ["RefinedNowPlayingNext"]);
   assert.equal(manifest.injects.Main[0].file, "main.js");
@@ -66,6 +66,8 @@ test("settings normalization clamps brightness and rejects unknown fit", () => {
   assert.equal(api.normalizeSettings({ brightness: 0 }).brightness, 0.15);
   assert.equal(api.normalizeSettings({ fit: "stretch" }).fit, "cover");
   assert.equal(api.normalizeSettings({ fit: "contain" }).fit, "contain");
+  assert.equal(api.normalizeSettings({}).compactControls, false);
+  assert.equal(api.normalizeSettings({ compactControls: true }).compactControls, true);
 });
 
 test("plugin code uses local BetterNCM file APIs and has no network call", () => {
@@ -87,6 +89,30 @@ test("native background is hidden only after the video is ready", () => {
   assert.doesNotMatch(styleSource, /body\.rnpvb-active\.mq-playing \.rnp-bg/);
   assert.match(mainSource, /rnpvbSetPagePhase\("ready"\)/);
   assert.match(mainSource, /rnpvbFailVideo\(video/);
+});
+
+test("compact controls are opt-in and cannot hide RNP settings", () => {
+  assert.match(mainSource, /compactControls:\s*false/);
+  assert.match(mainSource, /classList\.toggle\("rnpvb-compact-controls"/);
+  assert.match(mainSource, /data-rnpvb-field":\s*"compact-controls"/);
+  assert.match(
+    styleSource,
+    /body\.rnpvb-ready\.rnpvb-compact-controls\.mq-playing #main-player/
+  );
+  assert.doesNotMatch(styleSource, /body\.rnpvb-ready\.mq-playing #main-player/);
+
+  const protectedSelectors = [
+    "#rnp-settings",
+    ".rnp-settings-menu",
+    ".rnp-full-screen-button",
+    ".rnp-full-screen-clock",
+    ".rnp-mini-song-info",
+    ".rnp-lyrics-switch",
+    ".u-resize"
+  ];
+  protectedSelectors.forEach((selector) => {
+    assert.equal(styleSource.includes(selector), false, selector);
+  });
 });
 
 test("media errors provide actionable codec guidance", () => {
