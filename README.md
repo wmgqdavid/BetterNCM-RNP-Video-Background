@@ -8,9 +8,9 @@
 
 这是一个真实运行录屏：RNP 页面使用本地视频背景，歌词、封面和播放信息保持可见。
 
-[![播放演示视频](media/demo-preview.jpg)](media/demo.mp4)
+https://github.com/user-attachments/assets/31debbca-5090-4433-82ff-2ac716d3e461
 
-也可以直接下载演示文件：[media/demo.mp4](media/demo.mp4)
+如果当前浏览器无法显示播放器，也可以直接打开仓库文件：[media/demo.mp4](media/demo.mp4)
 
 ## 功能
 
