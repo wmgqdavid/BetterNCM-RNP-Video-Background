@@ -8,6 +8,7 @@ tests/
 .betterncm-ignore
 README.md
 CHANGELOG.md
+media/
 LICENSE
 项目说明.txt
 *.plugin
