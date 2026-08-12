@@ -6,6 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
+$JobPath = [IO.Path]::GetFullPath($JobPath)
 
 $ComponentVersion = "6.1.1"
 $ComponentBase = if ($env:RNPVB_COMPONENT_ROOT) {
@@ -17,9 +18,10 @@ $ComponentRoot = Join-Path $ComponentBase "ffmpeg-$ComponentVersion"
 $FfmpegPath = Join-Path $ComponentRoot "ffmpeg.exe"
 $FfprobePath = Join-Path $ComponentRoot "ffprobe.exe"
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$StatusPath = Join-Path $ScriptRoot "status.json"
-$CancelPath = Join-Path $ScriptRoot "cancel.json"
-$LogPath = Join-Path $ScriptRoot "worker.log"
+$DataRoot = Split-Path -Parent $JobPath
+$StatusPath = Join-Path $DataRoot "status.json"
+$CancelPath = Join-Path $DataRoot "cancel.json"
+$LogPath = Join-Path $DataRoot "worker.log"
 
 $Assets = @(
     [pscustomobject]@{

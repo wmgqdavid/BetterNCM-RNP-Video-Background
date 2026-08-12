@@ -4,9 +4,10 @@ const RNPVB_STYLE_ID = "rnpvb-style";
 const RNPVB_LOAD_TIMEOUT_MS = 15000;
 const RNPVB_JOB_TIMEOUT_MS = 30 * 60 * 1000;
 const RNPVB_TOOL_DIR = `${plugin.pluginPath}/tools`;
-const RNPVB_JOB_PATH = `${RNPVB_TOOL_DIR}/job.json`;
-const RNPVB_STATUS_PATH = `${RNPVB_TOOL_DIR}/status.json`;
-const RNPVB_CANCEL_PATH = `${RNPVB_TOOL_DIR}/cancel.json`;
+const RNPVB_DATA_DIR = "./rnp-video-background-tools";
+const RNPVB_JOB_PATH = `${RNPVB_DATA_DIR}/job.json`;
+const RNPVB_STATUS_PATH = `${RNPVB_DATA_DIR}/status.json`;
+const RNPVB_CANCEL_PATH = `${RNPVB_DATA_DIR}/cancel.json`;
 const RNPVB_LAUNCHER_PATH = `${RNPVB_TOOL_DIR}/launcher.vbs`;
 const RNPVB_FILTER = "视频文件 (*.mp4;*.webm)\0*.mp4;*.webm\0所有文件 (*.*)\0*.*\0";
 const RNPVB_OFFLINE_FILTER = "离线组件包 (*.zip)\0*.zip\0所有文件 (*.*)\0*.*\0";
@@ -215,6 +216,7 @@ async function rnpvbRunWorker(command, parameters, options) {
   const timeoutMs = options && options.timeoutMs || RNPVB_JOB_TIMEOUT_MS;
   const startedAt = Date.now();
   rnpvbState.activeJob = job;
+  if (typeof betterncm.fs.mkdir === "function") await betterncm.fs.mkdir(RNPVB_DATA_DIR);
   if (typeof betterncm.fs.remove === "function") {
     try {
       if (await betterncm.fs.exists(RNPVB_STATUS_PATH)) await betterncm.fs.remove(RNPVB_STATUS_PATH);
@@ -222,7 +224,7 @@ async function rnpvbRunWorker(command, parameters, options) {
   }
   await rnpvbWriteJson(RNPVB_JOB_PATH, job);
   const launcher = RNPVB_LAUNCHER_PATH.replace(/\//g, "\\");
-  await betterncm.app.exec(`wscript.exe "${launcher}"`);
+  await betterncm.app.exec(`wscript.exe "${launcher}" "${RNPVB_JOB_PATH}"`);
 
   try {
     while (Date.now() - startedAt < timeoutMs) {
