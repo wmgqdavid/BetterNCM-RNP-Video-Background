@@ -1,6 +1,11 @@
 *.plugin
 *.zip
 test-results/
+tools/job.json
+tools/status.json
+tools/cancel.json
+tools/worker.log
+tools/ffmpeg-*.txt
 release/
 outputs/
 preview-source.png

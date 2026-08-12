@@ -6,8 +6,8 @@
 - [x] 商店登记文件已填写 `wmgqdavid/BetterNCM-RNP-Video-Background`。
 - [x] 已创建公开仓库 `wmgqdavid/BetterNCM-RNP-Video-Background`。
 - [x] 已推送 `main` 分支。
-- [ ] 创建版本标签与 Release：`v0.1.2`。
-- [ ] 把 `outputs/rnp-video-background-0.1.2.plugin` 和 `SHA256SUMS.txt` 添加为 Release 附件。
+- [ ] 创建版本标签与 Release：`v0.2.0`。
+- [ ] 把 `outputs/rnp-video-background-0.2.0.plugin` 和 `SHA256SUMS.txt` 添加为 Release 附件。
 
 ## 二、提交 BetterNCM 插件市场
 
@@ -34,4 +34,4 @@
 
 ## 建议 PR 描述
 
-> 为 RefinedNowPlaying Next 添加可持久化的本地 MP4/WebM 视频背景，并隐藏其自带背景与 v3 播放控制区。插件仅使用 BetterNCM 本地文件 API，不发起网络请求；不会切换歌词 Overview/复制模式，也不会修改正常旋转歌词状态。
+> 为 RefinedNowPlaying Next 添加本地 MP4/WebM 视频背景、可选声音、播放同步，以及经过 SHA-256 校验的 FFmpeg 自动兼容转换。插件不会切换歌词 Overview/复制模式，也不会修改正常旋转歌词状态。
