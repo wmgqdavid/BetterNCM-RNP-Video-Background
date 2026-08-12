@@ -33,7 +33,7 @@
 
 ### 本地安装
 
-1. 从 [GitHub Releases](https://github.com/wmgqdavid/BetterNCM-RNP-Video-Background/releases) 下载 `rnp-video-background-0.2.2.plugin`。
+1. 下载本项目提供的 `rnp-video-background-0.2.2.plugin`，或等待 BetterNCM 插件市场完成同步。
 2. 在 BetterNCM 插件管理器中导入该文件。
 3. 重启网易云音乐，或使用 BetterNCM 的重新加载功能。
 4. 确认已安装并启用 **RefinedNowPlaying Next**。
