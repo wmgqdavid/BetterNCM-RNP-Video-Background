@@ -215,6 +215,11 @@ async function rnpvbRunWorker(command, parameters, options) {
   const timeoutMs = options && options.timeoutMs || RNPVB_JOB_TIMEOUT_MS;
   const startedAt = Date.now();
   rnpvbState.activeJob = job;
+  if (typeof betterncm.fs.remove === "function") {
+    try {
+      if (await betterncm.fs.exists(RNPVB_STATUS_PATH)) await betterncm.fs.remove(RNPVB_STATUS_PATH);
+    } catch (_error) {}
+  }
   await rnpvbWriteJson(RNPVB_JOB_PATH, job);
   const launcher = RNPVB_LAUNCHER_PATH.replace(/\//g, "\\");
   await betterncm.app.exec(`wscript.exe "${launcher}"`);
