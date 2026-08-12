@@ -80,6 +80,7 @@ test("plugin code uses BetterNCM file and worker APIs", () => {
   assert.match(mainSource, /betterncm\.fs\.mountFile/);
   assert.match(mainSource, /betterncm\.fs\.writeFileText/);
   assert.match(mainSource, /betterncm\.app\.exec/);
+  assert.match(mainSource, /wscript\.exe/);
   assert.doesNotMatch(mainSource, /\bfetch\s*\(|XMLHttpRequest|WebSocket/);
 });
 
@@ -172,6 +173,7 @@ test("worker pins and verifies FFmpeg and never overwrites the source", () => {
   assert.match(worker, /ComponentVersion = "6\.1\.1"/);
   assert.match(worker, /8883a3dffbd0a16cf4ef95206ea05283f78908dbfb118f73c83f4951dcc06d77/);
   assert.match(worker, /f309e6223ad89d2fe54bccd420a7709b66fd27540674e92309578ed491a43c8d/);
+  assert.doesNotMatch(worker, /ALLOW_UNPINNED|skip.*hash/i);
   assert.match(worker, /output.*不得覆盖原视频/i);
   assert.match(worker, /-c:v", "libx264"/);
   assert.match(worker, /-pix_fmt", "yuv420p"/);

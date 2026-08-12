@@ -129,6 +129,7 @@ const rnpvbState = {
   mountToken: 0,
   loadTimer: null,
   failedSourcePath: "",
+  convertingSourcePath: "",
   retryPlayHandler: null,
   playbackTimer: null,
   jobPollTimer: null,
@@ -215,7 +216,8 @@ async function rnpvbRunWorker(command, parameters, options) {
   const startedAt = Date.now();
   rnpvbState.activeJob = job;
   await rnpvbWriteJson(RNPVB_JOB_PATH, job);
-  await betterncm.app.exec(RNPVB_LAUNCHER_PATH);
+  const launcher = RNPVB_LAUNCHER_PATH.replace(/\//g, "\\");
+  await betterncm.app.exec(`wscript.exe "${launcher}"`);
 
   try {
     while (Date.now() - startedAt < timeoutMs) {
@@ -287,21 +289,26 @@ async function rnpvbProbeVideo(filePath) {
 
 async function rnpvbConvertVideo(filePath, force) {
   if (!rnpvbState.componentReady) throw new Error("请先安装转换组件");
+  rnpvbState.convertingSourcePath = filePath;
   rnpvbSetStatus(force ? "正在压缩当前视频…" : "检测到不兼容视频，正在自动转换…", "loading");
-  const result = await rnpvbRunWorker("transcode", {
-    inputPath: filePath,
-    keepAudio: rnpvbState.settings.videoAudioEnabled
-  });
-  rnpvbUpdateSettings({
-    enabled: true,
-    filePath: result.outputPath,
-    fileName: rnpvbBaseName(result.outputPath),
-    lastDirectory: rnpvbDirectoryName(result.outputPath)
-  }, { reloadSource: true });
-  rnpvbState.mediaInfo = rnpvbAnalyzeMedia(result.media);
-  rnpvbSetStatus(`转换完成，已切换到 ${rnpvbBaseName(result.outputPath)}`, "ok");
-  rnpvbScheduleSync();
-  return result.outputPath;
+  try {
+    const result = await rnpvbRunWorker("transcode", {
+      inputPath: filePath,
+      keepAudio: rnpvbState.settings.videoAudioEnabled
+    });
+    rnpvbUpdateSettings({
+      enabled: true,
+      filePath: result.outputPath,
+      fileName: rnpvbBaseName(result.outputPath),
+      lastDirectory: rnpvbDirectoryName(result.outputPath)
+    }, { reloadSource: true });
+    rnpvbState.mediaInfo = rnpvbAnalyzeMedia(result.media);
+    rnpvbSetStatus(`转换完成，已切换到 ${rnpvbBaseName(result.outputPath)}`, "ok");
+    rnpvbScheduleSync();
+    return result.outputPath;
+  } finally {
+    rnpvbState.convertingSourcePath = "";
+  }
 }
 
 async function rnpvbInspectAndConvert(filePath) {
@@ -455,6 +462,7 @@ function rnpvbFailVideo(video, message) {
   rnpvbSetStatus(message || rnpvbMediaErrorMessage(video.error), "error");
   if (rnpvbState.settings.autoConvert && rnpvbState.componentReady) {
     const failedPath = rnpvbState.settings.filePath;
+    if (rnpvbState.convertingSourcePath === failedPath) return;
     rnpvbConvertVideo(failedPath, false).catch((error) => {
       rnpvbSetStatus(error.message || String(error), "error");
     });

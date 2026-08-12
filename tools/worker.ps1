@@ -64,16 +64,8 @@ function Test-Component {
     if (-not (Test-Path -LiteralPath $FfmpegPath) -or -not (Test-Path -LiteralPath $FfprobePath)) { return $false }
     $ffmpegHash = Get-Sha256 $FfmpegPath
     $ffprobeHash = Get-Sha256 $FfprobePath
-    if ($ffmpegHash -eq $Assets[0].ExtractedSha256 -and $ffprobeHash -eq $Assets[1].ExtractedSha256) { return $true }
-    if ($env:RNPVB_ALLOW_UNPINNED_TEST_BINARIES -eq "1") {
-        try {
-            & $FfmpegPath -version *> $null
-            if ($LASTEXITCODE -ne 0) { return $false }
-            & $FfprobePath -version *> $null
-            return $LASTEXITCODE -eq 0
-        } catch { return $false }
-    }
-    return $false
+    return $ffmpegHash -eq $Assets[0].ExtractedSha256 -and
+           $ffprobeHash -eq $Assets[1].ExtractedSha256
 }
 
 function Expand-Gzip([string]$Source, [string]$Destination) {
