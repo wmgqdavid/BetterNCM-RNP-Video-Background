@@ -4,10 +4,7 @@ const RNPVB_STYLE_ID = "rnpvb-style";
 const RNPVB_LOAD_TIMEOUT_MS = 15000;
 const RNPVB_JOB_TIMEOUT_MS = 30 * 60 * 1000;
 const RNPVB_TOOL_DIR = `${plugin.pluginPath}/tools`;
-const RNPVB_DATA_DIR = "./rnp-video-background-tools";
-const RNPVB_JOB_PATH = `${RNPVB_DATA_DIR}/job.json`;
-const RNPVB_STATUS_PATH = `${RNPVB_DATA_DIR}/status.json`;
-const RNPVB_CANCEL_PATH = `${RNPVB_DATA_DIR}/cancel.json`;
+const RNPVB_DATA_DIR_NAME = "rnp-video-background-tools";
 const RNPVB_LAUNCHER_PATH = `${RNPVB_TOOL_DIR}/launcher.vbs`;
 const RNPVB_FILTER = "视频文件 (*.mp4;*.webm)\0*.mp4;*.webm\0所有文件 (*.*)\0*.*\0";
 const RNPVB_OFFLINE_FILTER = "离线组件包 (*.zip)\0*.zip\0所有文件 (*.*)\0*.*\0";
@@ -138,6 +135,7 @@ const rnpvbState = {
   componentReady: false,
   componentChecked: false,
   mediaInfo: null,
+  workerPaths: null,
   configRoots: new Set(),
   status: {
     kind: "idle",
@@ -210,26 +208,40 @@ async function rnpvbWriteJson(filePath, value) {
   await betterncm.fs.writeFileText(filePath, JSON.stringify(value));
 }
 
+async function rnpvbWorkerPaths() {
+  if (rnpvbState.workerPaths) return rnpvbState.workerPaths;
+  const dataRoot = String(await betterncm.app.getDataPath()).replace(/[\\/]+$/, "");
+  const dataDir = `${dataRoot}/${RNPVB_DATA_DIR_NAME}`;
+  rnpvbState.workerPaths = {
+    dataDir,
+    jobPath: `${dataDir}/job.json`,
+    statusPath: `${dataDir}/status.json`,
+    cancelPath: `${dataDir}/cancel.json`
+  };
+  return rnpvbState.workerPaths;
+}
+
 async function rnpvbRunWorker(command, parameters, options) {
   if (rnpvbState.activeJob) throw new Error("已有组件任务正在运行");
   const job = Object.assign({ protocol: 1, id: rnpvbJobId(), command }, parameters || {});
   const timeoutMs = options && options.timeoutMs || RNPVB_JOB_TIMEOUT_MS;
   const startedAt = Date.now();
   rnpvbState.activeJob = job;
-  if (typeof betterncm.fs.mkdir === "function") await betterncm.fs.mkdir(RNPVB_DATA_DIR);
+  const paths = await rnpvbWorkerPaths();
+  if (typeof betterncm.fs.mkdir === "function") await betterncm.fs.mkdir(paths.dataDir);
   if (typeof betterncm.fs.remove === "function") {
     try {
-      if (await betterncm.fs.exists(RNPVB_STATUS_PATH)) await betterncm.fs.remove(RNPVB_STATUS_PATH);
+      if (await betterncm.fs.exists(paths.statusPath)) await betterncm.fs.remove(paths.statusPath);
     } catch (_error) {}
   }
-  await rnpvbWriteJson(RNPVB_JOB_PATH, job);
+  await rnpvbWriteJson(paths.jobPath, job);
   const launcher = RNPVB_LAUNCHER_PATH.replace(/\//g, "\\");
-  await betterncm.app.exec(`wscript.exe "${launcher}" "${RNPVB_JOB_PATH}"`);
+  await betterncm.app.exec(`wscript.exe "${launcher}" "${paths.jobPath.replace(/\//g, "\\")}"`);
 
   try {
     while (Date.now() - startedAt < timeoutMs) {
       await rnpvbSleep(500);
-      const status = await rnpvbReadJson(RNPVB_STATUS_PATH);
+      const status = await rnpvbReadJson(paths.statusPath);
       if (!status || status.jobId !== job.id) continue;
       if (status.componentReady !== undefined) {
         rnpvbState.componentReady = Boolean(status.componentReady);
@@ -282,7 +294,8 @@ async function rnpvbInstallOfflineComponent() {
 
 async function rnpvbCancelWorker() {
   if (!rnpvbState.activeJob) return;
-  await rnpvbWriteJson(RNPVB_CANCEL_PATH, { jobId: rnpvbState.activeJob.id });
+  const paths = await rnpvbWorkerPaths();
+  await rnpvbWriteJson(paths.cancelPath, { jobId: rnpvbState.activeJob.id });
   rnpvbSetStatus("正在取消任务…", "loading");
 }
 
