@@ -29,3 +29,14 @@
 - BetterNCM 商店申请：https://github.com/BetterNCM/BetterNCM-Plugins/pull/725
 - PR 仅新增 `plugins-list/rnp-video-background.json`
 - PR 创建时状态：open、clean、非草稿
+# 0.2.0 验证记录（2026-08-12）
+
+- JavaScript 语法检查通过。
+- Node 自动化测试 13/13 通过。
+- PowerShell 工作器语法检查通过。
+- 包内容校验通过，仅包含 manifest、主脚本、样式、预览图和三个转换工具文件。
+- 合成 4K60 HEVC + AAC 输入成功转换为 H.264 High、1920×1080、30fps、yuv420p MP4。
+- 静音转换输出无音轨；有声转换输出为 AAC-LC、48 kHz、双声道。
+- 原文件保持不变，输出使用新的 `.rnp-compatible.mp4` 路径。
+- 安装包 SHA-256：`20a135002a35884f4e7d97f1de0282dc643d1df7dd6c189e7b38ad5dca792e6c`。
+- 受当前环境对 BetterNCM 目录写入权限限制，安装与网易云 GUI 重载需要用户在本机执行或通过商店更新完成。
