@@ -165,6 +165,18 @@ function Test-Cancelled {
     } catch { return $false }
 }
 
+function Convert-ProgressSeconds([string]$Value) {
+    if ([string]::IsNullOrWhiteSpace($Value) -or $Value -eq "N/A") { return $null }
+    $microseconds = 0L
+    if (-not [long]::TryParse(
+        $Value.Trim(),
+        [Globalization.NumberStyles]::Integer,
+        [Globalization.CultureInfo]::InvariantCulture,
+        [ref]$microseconds
+    )) { return $null }
+    return [double]$microseconds / 1000000.0
+}
+
 function Invoke-Transcode([string]$InputPath, [bool]$KeepAudio) {
     if (-not (Test-Path -LiteralPath $InputPath)) { throw "视频文件不存在" }
     $probe = Invoke-Probe $InputPath
@@ -214,7 +226,10 @@ function Invoke-Transcode([string]$InputPath, [bool]$KeepAudio) {
                 $lines = Get-Content -LiteralPath $progressPath -ErrorAction SilentlyContinue
                 $outLine = $lines | Where-Object { $_ -like "out_time_ms=*" } | Select-Object -Last 1
                 $speedLine = $lines | Where-Object { $_ -like "speed=*" } | Select-Object -Last 1
-                if ($outLine) { $lastOutTime = [double]($outLine -replace '^out_time_ms=', '') / 1000000.0 }
+                if ($outLine) {
+                    $parsedOutTime = Convert-ProgressSeconds ($outLine -replace '^out_time_ms=', '')
+                    if ($null -ne $parsedOutTime) { $lastOutTime = $parsedOutTime }
+                }
                 $percent = if ($duration -gt 0) { [math]::Min(99, [math]::Round($lastOutTime / $duration * 100, 1)) } else { 0 }
                 Write-Status "transcoding" "正在转换视频：$percent%" @{ progress = $percent; speed = ($speedLine -replace '^speed=', ''); outputPath = $outputFull }
             }

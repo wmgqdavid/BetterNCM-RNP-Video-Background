@@ -1,6 +1,6 @@
 项目名称：RNP Video Background
-当前状态：0.2.0 已实现并通过自动化与合成 4K60 HEVC 端到端转换验证，待 BetterNCM 实机界面验收
+当前状态：0.2.1 已修复转换初期 out_time_ms=N/A 导致任务中断的问题，并通过真实 liang.mp4 启动转换验证
 一句话项目内容：为 RefinedNowPlaying Next 添加本地视频背景、可选声音、播放同步和安全的 FFmpeg 自动兼容转换。
-主要入口或成品：outputs/rnp-video-background-0.2.0.plugin、manifest.json、main.js、tools/worker.ps1
-下一步：安装 0.2.0，重载网易云音乐并验证设置页、背景层、歌词与大视频自动转换。
+主要入口或成品：outputs/rnp-video-background-0.2.1.plugin、manifest.json、main.js、tools/worker.ps1
+下一步：安装 0.2.1，重载网易云音乐并完成大视频全程转换验收。
 更新时间：2026-08-12

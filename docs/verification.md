@@ -40,3 +40,10 @@
 - 原文件保持不变，输出使用新的 `.rnp-compatible.mp4` 路径。
 - 安装包 SHA-256：`7bb94a590b76ab39a752ed9fc43247eb3d2949b8478ce33a1db3741623163e9b`。
 - 受当前环境对 BetterNCM 目录写入权限限制，安装与网易云 GUI 重载需要用户在本机执行或通过商店更新完成。
+
+# 0.2.1 验证记录（2026-08-12）
+
+- 从本机 worker 日志复现并定位 `out_time_ms=N/A` 被强制转换为 `System.Double` 的异常。
+- 改为固定文化设置的 `Int64.TryParse`；`N/A`、空值和畸形值不会再中断 FFmpeg。
+- JavaScript 回归测试 13/13 通过，PowerShell 语法检查通过。
+- 使用真实 `C:\Users\34735\Videos\liang.mp4` 验证任务成功进入 `transcoding` 状态，随后安全取消长耗时验证；原视频未修改。

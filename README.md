@@ -38,7 +38,7 @@
 
 ### 本地安装
 
-1. 从项目 Release 或本地交付目录取得 `rnp-video-background-0.2.0.plugin`。
+1. 从项目 Release 或本地交付目录取得 `rnp-video-background-0.2.1.plugin`。
 2. 把该文件放入 BetterNCM 数据目录下的 `plugins` 文件夹。
 3. 重启网易云音乐，或在 BetterNCM 中重新加载插件。
 4. 确认 RefinedNowPlaying Next 已安装并启用。

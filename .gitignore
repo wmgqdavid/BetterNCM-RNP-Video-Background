@@ -8,5 +8,8 @@ tools/worker.log
 tools/ffmpeg-*.txt
 release/
 outputs/
+tmp-*/
+tools/ffmpeg-error.log
+tools/ffmpeg-progress.txt
 preview-source.png
 preview-optimized.png

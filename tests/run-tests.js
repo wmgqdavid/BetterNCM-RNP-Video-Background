@@ -37,7 +37,7 @@ function loadPureApi() {
 test("manifest contains the required BetterNCM metadata", () => {
   assert.equal(manifest.manifest_version, 1);
   assert.equal(manifest.slug, "rnp-video-background");
-  assert.equal(manifest.version, "0.2.0");
+  assert.equal(manifest.version, "0.2.1");
   assert.deepEqual(manifest.requirements, ["RefinedNowPlayingNext"]);
   assert.deepEqual(manifest.loadAfter, ["RefinedNowPlayingNext"]);
   assert.equal(manifest.injects.Main[0].file, "main.js");
@@ -179,4 +179,8 @@ test("worker pins and verifies FFmpeg and never overwrites the source", () => {
   assert.match(worker, /-pix_fmt", "yuv420p"/);
   assert.match(worker, /-an/);
   assert.match(worker, /-b:a", "128k"/);
+  assert.match(worker, /function Convert-ProgressSeconds/);
+  assert.match(worker, /Value -eq "N\/A"/);
+  assert.match(worker, /\[long\]::TryParse/);
+  assert.doesNotMatch(worker, /\[double\]\(\$outLine -replace/);
 });
