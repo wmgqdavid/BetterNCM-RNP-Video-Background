@@ -37,7 +37,7 @@ function loadPureApi() {
 test("manifest contains the required BetterNCM metadata", () => {
   assert.equal(manifest.manifest_version, 1);
   assert.equal(manifest.slug, "rnp-video-background");
-  assert.equal(manifest.version, "0.2.1");
+  assert.equal(manifest.version, "0.2.2");
   assert.deepEqual(manifest.requirements, ["RefinedNowPlayingNext"]);
   assert.deepEqual(manifest.loadAfter, ["RefinedNowPlayingNext"]);
   assert.equal(manifest.injects.Main[0].file, "main.js");
@@ -66,8 +66,7 @@ test("settings normalization clamps brightness and rejects unknown fit", () => {
   assert.equal(api.normalizeSettings({ brightness: 0 }).brightness, 0.15);
   assert.equal(api.normalizeSettings({ fit: "stretch" }).fit, "cover");
   assert.equal(api.normalizeSettings({ fit: "contain" }).fit, "contain");
-  assert.equal(api.normalizeSettings({}).compactControls, false);
-  assert.equal(api.normalizeSettings({ compactControls: true }).compactControls, true);
+  assert.equal(Object.hasOwn(api.normalizeSettings({ compactControls: true }), "compactControls"), false);
   assert.equal(api.normalizeSettings({}).videoAudioEnabled, false);
   assert.equal(api.normalizeSettings({}).videoVolume, 0.35);
   assert.equal(api.normalizeSettings({ videoVolume: 9 }).videoVolume, 1);
@@ -115,15 +114,14 @@ test("native background is hidden only after the video is ready", () => {
   assert.match(mainSource, /rnpvbFailVideo\(video/);
 });
 
-test("compact controls are opt-in and cannot hide RNP settings", () => {
-  assert.match(mainSource, /compactControls:\s*false/);
-  assert.match(mainSource, /classList\.toggle\("rnpvb-compact-controls"/);
-  assert.match(mainSource, /data-rnpvb-field":\s*"compact-controls"/);
-  assert.match(
-    styleSource,
-    /body\.rnpvb-ready\.rnpvb-compact-controls\.mq-playing #main-player/
-  );
-  assert.doesNotMatch(styleSource, /body\.rnpvb-ready\.mq-playing #main-player/);
+test("plugin leaves compact and playback-control behavior to RNP", () => {
+  const combined = `${mainSource}\n${styleSource}`;
+  ["compactControls", "rnpvb-compact-controls", "精简播放控件"].forEach((token) => {
+    assert.equal(combined.includes(token), false, token);
+  });
+  ["#main-player", ".m-player-fm", ".rnp-v3-controls", ".progressbar-preview"].forEach((selector) => {
+    assert.equal(styleSource.includes(selector), false, selector);
+  });
 
   const protectedSelectors = [
     "#rnp-settings",

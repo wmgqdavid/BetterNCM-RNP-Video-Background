@@ -1,5 +1,11 @@
 # 更新日志
 
+## 0.2.2 - 2026-08-12
+
+- 移除与 RefinedNowPlaying Next 自带功能重复的“精简播放控件”设置。
+- 删除插件隐藏底部播放栏、进度条、音量和 RNP v3 控件的全部样式与配置字段。
+- 旧版本保存的 `compactControls` 配置会被忽略，播放控件显示完全交还 RNP 管理。
+
 ## 0.2.1 - 2026-08-12
 
 - 修复 FFmpeg 刚开始转换时返回 `out_time_ms=N/A`，导致 PowerShell 将 `N/A` 强制转换为 `System.Double` 而中断任务的问题。

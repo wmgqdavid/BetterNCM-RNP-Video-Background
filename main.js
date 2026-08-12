@@ -15,7 +15,6 @@ const RNPVB_DEFAULTS = Object.freeze({
   lastDirectory: "",
   fit: "cover",
   brightness: 0.65,
-  compactControls: false,
   videoAudioEnabled: false,
   videoVolume: 0.35,
   syncWithMusicPlayback: true,
@@ -53,7 +52,6 @@ function rnpvbNormalizeSettings(raw) {
     brightness: Number.isFinite(numericBrightness)
       ? rnpvbClamp(numericBrightness, 0.15, 1)
       : RNPVB_DEFAULTS.brightness,
-    compactControls: input.compactControls === true,
     videoAudioEnabled: input.videoAudioEnabled === true,
     videoVolume: Number.isFinite(numericVolume)
       ? rnpvbClamp(numericVolume, 0, 1)
@@ -175,7 +173,6 @@ function rnpvbApplyVisualSettings() {
   if (!body) return;
   body.style.setProperty("--rnpvb-fit", rnpvbState.settings.fit);
   body.style.setProperty("--rnpvb-brightness", String(rnpvbState.settings.brightness));
-  body.classList.toggle("rnpvb-compact-controls", rnpvbState.settings.compactControls);
   const video = rnpvbState.videoElement;
   if (video) {
     video.muted = !rnpvbState.settings.videoAudioEnabled;
@@ -736,7 +733,6 @@ function rnpvbRefreshConfigViews() {
     const fit = root.querySelector('[data-rnpvb-field="fit"]');
     const brightness = root.querySelector('[data-rnpvb-field="brightness"]');
     const brightnessValue = root.querySelector('[data-rnpvb-field="brightness-value"]');
-    const compactControls = root.querySelector('[data-rnpvb-field="compact-controls"]');
     const videoAudioEnabled = root.querySelector('[data-rnpvb-field="video-audio-enabled"]');
     const videoVolume = root.querySelector('[data-rnpvb-field="video-volume"]');
     const videoVolumeValue = root.querySelector('[data-rnpvb-field="video-volume-value"]');
@@ -753,7 +749,6 @@ function rnpvbRefreshConfigViews() {
     if (fit) fit.value = rnpvbState.settings.fit;
     if (brightness) brightness.value = String(rnpvbState.settings.brightness);
     if (brightnessValue) brightnessValue.textContent = `${Math.round(rnpvbState.settings.brightness * 100)}%`;
-    if (compactControls) compactControls.checked = rnpvbState.settings.compactControls;
     if (videoAudioEnabled) videoAudioEnabled.checked = rnpvbState.settings.videoAudioEnabled;
     if (videoVolume) {
       videoVolume.value = String(rnpvbState.settings.videoVolume);
@@ -842,12 +837,6 @@ function rnpvbCreateConfigView() {
     brightnessValue
   ]);
 
-  const compactControlsInput = rnpvbCreateElement("input", {
-    type: "checkbox",
-    "data-rnpvb-field": "compact-controls",
-    onchange: (event) => rnpvbUpdateSettings({ compactControls: event.target.checked })
-  });
-
   const videoAudioInput = rnpvbCreateElement("input", {
     type: "checkbox", "data-rnpvb-field": "video-audio-enabled",
     onchange: (event) => rnpvbUpdateSettings({ videoAudioEnabled: event.target.checked })
@@ -890,7 +879,6 @@ function rnpvbCreateConfigView() {
       rnpvbCreateElement("div", { textContent: "背景亮度" }),
       brightnessControl
     ]),
-    rnpvbConfigRow("精简播放控件", compactControlsInput),
     rnpvbConfigRow("播放视频声音", videoAudioInput),
     rnpvbCreateElement("div", { className: "rnpvb-row" }, [
       rnpvbCreateElement("div", { textContent: "视频音量" }), videoVolumeControl
@@ -948,7 +936,6 @@ function rnpvbCreateConfigView() {
         enabled: RNPVB_DEFAULTS.enabled,
         fit: RNPVB_DEFAULTS.fit,
         brightness: RNPVB_DEFAULTS.brightness,
-        compactControls: RNPVB_DEFAULTS.compactControls,
         videoAudioEnabled: RNPVB_DEFAULTS.videoAudioEnabled,
         videoVolume: RNPVB_DEFAULTS.videoVolume,
         syncWithMusicPlayback: RNPVB_DEFAULTS.syncWithMusicPlayback,
@@ -995,7 +982,6 @@ function rnpvbDestroy() {
   if (document.body) {
     document.body.style.removeProperty("--rnpvb-fit");
     document.body.style.removeProperty("--rnpvb-brightness");
-    document.body.classList.remove("rnpvb-compact-controls");
   }
 }
 
